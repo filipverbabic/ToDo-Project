@@ -17,7 +17,7 @@ class ITodoRepository(ABC):
         pass
 
     @abstractmethod
-    def update_todo(self, todo_id: int, todo: Todo) -> Todo | None:
+    def update_todo(self, todo_id: int, data: dict) -> Todo | None:
         pass
 
     @abstractmethod
@@ -39,13 +39,12 @@ class TodoRepository(ITodoRepository):
         self.db_session.refresh(todo)
         return todo
 
-    def update_todo(self, todo_id: int, todo: Todo) -> Todo:
+    def update_todo(self, todo_id: int, data: dict) -> Todo | None:
         existing_todo = self.db_session.query(Todo).filter(Todo.id == todo_id).first()
         if not existing_todo:
             return None
-        existing_todo.title = todo.title
-        existing_todo.description = todo.description
-        existing_todo.completed = todo.completed
+        for key, value in data.items():
+            setattr(existing_todo, key, value)
         self.db_session.commit()
         self.db_session.refresh(existing_todo)
         return existing_todo
