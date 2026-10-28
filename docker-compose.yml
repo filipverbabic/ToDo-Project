@@ -1,0 +1,26 @@
+services:
+  database:
+    image: postgres:latest
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    networks:
+      - todo-network
+  
+  backend:
+    build:
+      context: .
+    ports:
+      - 8000:8000
+    environment:
+      DB_URL: postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
+      DEBUG: ${DEBUG}
+    depends_on:
+      - database
+    networks:
+      - todo-network
+networks:
+  todo-network:

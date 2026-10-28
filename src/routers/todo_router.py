@@ -5,11 +5,11 @@ from src.schemas.todo_schema import TodoCreate, TodoResponse, TodoUpdate
 
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
-@router.get("", response_model=list[TodoResponse])
+@router.get("/", response_model=list[TodoResponse])
 def get_all_todos(service: ITodoService = Depends(get_todo_service)):
     return service.get_all_todos()
 
-@router.post("", status_code=201, response_model=TodoResponse)
+@router.post("/", status_code=201, response_model=TodoResponse)
 def create_todo(todo: TodoCreate, service: ITodoService = Depends(get_todo_service)):
     return service.create_todo(todo)
 

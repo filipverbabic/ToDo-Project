@@ -8,6 +8,8 @@ class UserBase(BaseModel):
     email: EmailStr
 
 class UserCreate(UserBase):
+    #username
+    #email
     password: str = Field(min_length=8, max_length=20)
 
 class UserLogin(BaseModel):
@@ -20,4 +22,9 @@ class UserResponse(UserBase):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
-    
+
+class UserUpdate(BaseModel):
+    username: str | None = Field(default=None, min_length=3, max_length=20)
+    email: EmailStr | None = None
+    is_active: bool | None = None
+

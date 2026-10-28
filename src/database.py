@@ -4,7 +4,7 @@ from src.config import DATABASE_URL, DEBUG
 
 
 
-engine = create_engine(DATABASE_URL, echo=DEBUG, connect_args={"check_same_thread": False})
+engine = create_engine(DATABASE_URL, echo=DEBUG)
 
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
