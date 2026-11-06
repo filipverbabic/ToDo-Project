@@ -27,6 +27,10 @@ class IUserRepository(ABC):
     def get_user_by_username(self, username: str) -> User | None:
         pass
 
+    @abstractmethod
+    def get_user_by_id(self, user_id: int) -> User | None:
+        pass
+
 
 class UserRepository(IUserRepository):
     def __init__(self, db_session):
@@ -61,6 +65,9 @@ class UserRepository(IUserRepository):
 
     def get_user_by_username(self, username: str) -> User | None:
         return self.db_session.query(User).filter(User.username == username).first()
+
+    def get_user_by_id(self, user_id: int) -> User | None:
+        return self.db_session.get(User, user_id)
 
 def get_user_repository(db_session: Session = Depends(get_db_session)) -> IUserRepository:
     return UserRepository(db_session=db_session)

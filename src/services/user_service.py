@@ -25,13 +25,16 @@ class IUserService(ABC):
         pass
 
     @abstractmethod
-    def get_user_by_username(self, username: str) -> User | None:
+    def get_user_by_username(self, username: str) -> User:
         pass
 
     @abstractmethod
     def authenticate_user(self, login_data: UserLogin) -> User:
         pass
 
+    @abstractmethod
+    def get_user_by_id(self, user_id: int) -> User:
+        pass
 
 class UserService(IUserService):
     def __init__(self, user_repository: IUserRepository):
@@ -59,7 +62,7 @@ class UserService(IUserService):
     def get_all_users(self) -> list[User]:
         return self.user_repository.get_all_users()
 
-    def get_user_by_username(self, username: str) -> User | None:
+    def get_user_by_username(self, username: str) -> User:
         user = self.user_repository.get_user_by_username(username)
         if user is None:
             raise HTTPException(status_code=404, detail=f"User {username} does not exist")
@@ -71,6 +74,12 @@ class UserService(IUserService):
             raise HTTPException(status_code=401, detail="Invalid username or password")
         if not user.is_active:
             raise HTTPException(status_code=403, detail="User is inactive")
+        return user
+
+    def get_user_by_id(self, user_id: int) -> User:
+        user = self.user_repository.get_user_by_id(user_id)
+        if user is None:
+            raise HTTPException(status_code=404, detail=f"User with id {user_id} does not exist")
         return user
     
 def get_user_service(user_repository: IUserRepository = Depends(get_user_repository)) -> IUserService:

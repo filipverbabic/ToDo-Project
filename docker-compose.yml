@@ -7,6 +7,8 @@ services:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql
     networks:
       - todo-network
   
@@ -18,9 +20,23 @@ services:
     environment:
       DB_URL: postgresql+psycopg://${DB_USER}:${DB_PASSWORD}@database:5432/${DB_NAME}
       DEBUG: ${DEBUG}
+      SECRET_KEY: ${SECRET_KEY}
+      TOKEN_EXPIRATION_HOURS: ${TOKEN_EXPIRATION_HOURS}
+      REDIS_URL: ${REDIS_URL}
     depends_on:
       - database
+      - redis
     networks:
       - todo-network
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - 6379:6379
+    networks:
+      - todo-network
+
+volumes:
+  postgres_data:      
 networks:
   todo-network:

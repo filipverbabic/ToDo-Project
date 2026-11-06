@@ -15,6 +15,7 @@ class TodoUpdate(BaseModel):
 
 class TodoResponse(TodoBase):
     id: int
+    space_id: int | None = None
     completed: bool
 
     model_config = ConfigDict(from_attributes=True)

@@ -9,7 +9,7 @@ from src.models import Todo
 class ITodoRepository(ABC):
 
     @abstractmethod
-    def get_all_todos(self) -> list[Todo]:
+    def get_all_todos(self, user_id: int) -> list[Todo]:
         pass
 
     @abstractmethod
@@ -17,11 +17,23 @@ class ITodoRepository(ABC):
         pass
 
     @abstractmethod
-    def update_todo(self, todo_id: int, data: dict) -> Todo | None:
+    def update_todo(self, todo_id: int, data: dict, user_id: int) -> Todo | None:
         pass
 
     @abstractmethod
-    def delete_todo(self, todo_id: int) -> bool:
+    def delete_todo(self, todo_id: int, user_id: int) -> bool:
+        pass
+
+    @abstractmethod
+    def get_space_todos(self, space_id: int) -> list[Todo]:
+        pass
+
+    @abstractmethod
+    def update_space_todo(self, todo_id: int, data: dict, space_id: int) -> Todo | None:
+        pass
+
+    @abstractmethod
+    def delete_space_todo(self, todo_id: int, space_id: int) -> bool:
         pass
 
 
@@ -30,8 +42,8 @@ class TodoRepository(ITodoRepository):
     def __init__(self, db_session: Session):
         self.db_session = db_session
 
-    def get_all_todos(self) -> list[Todo]:
-        return self.db_session.query(Todo).all()
+    def get_all_todos(self, user_id: int) -> list[Todo]:
+        return self.db_session.query(Todo).filter_by(user_id = user_id).all()
 
     def create_todo(self, todo: Todo) -> Todo:
         self.db_session.add(todo)
@@ -39,8 +51,8 @@ class TodoRepository(ITodoRepository):
         self.db_session.refresh(todo)
         return todo
 
-    def update_todo(self, todo_id: int, data: dict) -> Todo | None:
-        existing_todo = self.db_session.query(Todo).filter(Todo.id == todo_id).first()
+    def update_todo(self, todo_id: int, data: dict, user_id: int) -> Todo | None:
+        existing_todo = self.db_session.query(Todo).filter_by(id = todo_id, user_id = user_id).first()
         if not existing_todo:
             return None
         for key, value in data.items():
@@ -49,8 +61,29 @@ class TodoRepository(ITodoRepository):
         self.db_session.refresh(existing_todo)
         return existing_todo
 
-    def delete_todo(self, todo_id: int) -> bool:
-        existing_todo = self.db_session.query(Todo).filter(Todo.id == todo_id).first()
+    def delete_todo(self, todo_id: int, user_id: int) -> bool:
+        existing_todo = self.db_session.query(Todo).filter_by(id = todo_id, user_id = user_id).first()
+        if not existing_todo:
+            return False
+        self.db_session.delete(existing_todo)
+        self.db_session.commit()
+        return True
+
+    def get_space_todos(self, space_id: int) -> list[Todo]:
+        return self.db_session.query(Todo).filter_by(space_id = space_id).all()
+
+    def update_space_todo(self, todo_id: int, data: dict, space_id: int) -> Todo | None:
+        existing_todo = self.db_session.query(Todo).filter_by(id = todo_id, space_id = space_id).first()
+        if not existing_todo:
+            return None
+        for key, value in data.items():
+            setattr(existing_todo, key, value)
+        self.db_session.commit()
+        self.db_session.refresh(existing_todo)
+        return existing_todo
+
+    def delete_space_todo(self, todo_id: int, space_id: int) -> bool:
+        existing_todo = self.db_session.query(Todo).filter_by(id = todo_id, space_id = space_id).first()
         if not existing_todo:
             return False
         self.db_session.delete(existing_todo)
