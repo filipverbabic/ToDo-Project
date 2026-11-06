@@ -10,7 +10,7 @@ from src.repositories.todo_repository import ITodoRepository, get_todo_repositor
 
 class ITodoService(ABC):
     @abstractmethod
-    def get_all_todos(self, user_id: int) -> list[Todo]: ...
+    def get_all_todos(self, user_id: int) -> list[TodoResponse]: ...
 
     @abstractmethod
     def create_todo(self, todo: TodoCreate, user_id: int) -> Todo: ...
@@ -39,15 +39,8 @@ class TodoService(ITodoService):
         self.todo_repository = todo_repository
         self.todo_cache_repository = todo_cache_repository
 
-    def get_all_todos(self, user_id: int) -> list[Todo]:
-        cached_todos = self.todo_cache_repository.get_todos(user_id=user_id)
-        if cached_todos is not None:
-            return [TodoResponse(**todo) for todo in cached_todos]
-
-        
-        todos = [TodoResponse.model_validate(todo) for todo in self.todo_repository.get_all_todos(user_id=user_id)]
-        self.todo_cache_repository.set_todos(user_id=user_id, todos=[todo.model_dump() for todo in todos])
-        return todos
+    def get_all_todos(self, user_id: int) -> list[TodoResponse]:
+        return [TodoResponse.model_validate(todo) for todo in self.todo_repository.get_all_todos(user_id=user_id)]
 
     def create_todo(self, todo_data: TodoCreate, user_id: int) -> Todo:
         todo = self.todo_repository.create_todo(Todo(**todo_data.model_dump(), user_id=user_id))

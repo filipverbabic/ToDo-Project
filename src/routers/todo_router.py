@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from src.cache import cache_response
 from src.models import User
 from src.services.security_service import get_current_user
 from src.services.todo_service import ITodoService, get_todo_service
@@ -8,6 +9,7 @@ from src.schemas.todo_schema import TodoCreate, TodoResponse, TodoUpdate
 router = APIRouter(prefix="/todos", tags=["Todos"])
 
 @router.get("/", response_model=list[TodoResponse])
+@cache_response(key_prefix="todos", ttl=300)
 def get_all_todos(service: ITodoService = Depends(get_todo_service), current_user: User = Depends(get_current_user)):
     return service.get_all_todos(current_user.id)
 
